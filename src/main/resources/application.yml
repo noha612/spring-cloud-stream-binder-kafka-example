@@ -1,0 +1,45 @@
+# Spring
+spring:
+  cloud:
+    stream:
+      enabled: true
+      shutdownTimeout: 300000
+      default-binder: kafka
+      kafka:
+        binder:
+          brokers: kafka-1:9092,kafka-2:9092,kafka-3:9092
+          auto-create-topics: true
+          auto-add-partitions: true
+#          min-partition-count: 4
+          consumer-properties:
+            auto.offset.reset: latest
+#            key:
+#              deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#            value:
+#              deserializer: vn.com.viettel.vds.streaming.message.TransDailyHisFinanceDeserializer
+          producer-properties:
+            key.serializer: org.apache.kafka.common.serialization.StringSerializer
+            value.serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      bindings:
+        bankplus-trans-daily-his-finance:
+          consumer:
+            partitioned: true
+            concurrency: 30
+            use-native-decoding: true
+          destination: CUSTOM-TRANS_DAILY_HIS_FINANCE-REALTIME
+          group: policy-service
+        pol-accumulation-in:
+          consumer:
+            partitioned: true
+            concurrency: 32
+            use-native-decoding: true
+            auto.offset.reset: latest
+          destination: POL-ACCUMULATION-UPDATE
+          group: policy-service
+        pol-accumulation-out:
+          producer:
+            partition-count: 32
+            use-native-encoding: true
+            partition-key-expression: headers.partitionKey
+          destination: POL-ACCUMULATION-UPDATE
+          group: policy-service
